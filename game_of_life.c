@@ -1,12 +1,5 @@
-#include <stdio.h>
-#include <SDL2/SDL.h>
-#include <unistd.h>
-#include <string.h>
-
+#include "sim.h"
 // gcc game_of_life.c -lSDL2
-
-#define WINDOW_HEIGHT 600 // 0 <= y < 600
-#define WINDOW_WIDTH 800  // 0 <= x < 800
 
 #define ALIVE 1
 #define DEAD 0
@@ -17,13 +10,13 @@ int mod(int num, int mod) {
 }
 
 int calc_neighb(int y, int x) {
-	return mod(y, WINDOW_HEIGHT) * WINDOW_WIDTH + mod(x, WINDOW_WIDTH);
+	return mod(y, SIM_Y_SIZE) * SIM_X_SIZE + mod(x, SIM_X_SIZE);
 }
 
 void calc_frame(int* prev, int* next) {
 
-	for (int x = 0; x < WINDOW_WIDTH; x++) {
-		for (int y = 0; y < WINDOW_HEIGHT; y++) {
+	for (int x = 0; x < SIM_X_SIZE; x++) {
+		for (int y = 0; y < SIM_Y_SIZE; y++) {
 
 			int near_alive = 0;
 			if (prev[calc_neighb(y - 1, x - 1)] == ALIVE) near_alive++;
@@ -35,18 +28,18 @@ void calc_frame(int* prev, int* next) {
 			if (prev[calc_neighb(y + 1, x    )] == ALIVE) near_alive++;
 			if (prev[calc_neighb(y + 1, x + 1)] == ALIVE) near_alive++;
 
-			if (prev[y * WINDOW_WIDTH + x] == ALIVE) {
+			if (prev[y * SIM_X_SIZE + x] == ALIVE) {
 
 				if (near_alive > 3 || near_alive < 2) {
-					next[y * WINDOW_WIDTH + x] = DEAD;
+					next[y * SIM_X_SIZE + x] = DEAD;
 				} else {
-					next[y * WINDOW_WIDTH + x] = ALIVE;
+					next[y * SIM_X_SIZE + x] = ALIVE;
 				}
 			} else {
 				if (near_alive > 2) {
-					next[y * WINDOW_WIDTH + x] = ALIVE;
+					next[y * SIM_X_SIZE + x] = ALIVE;
 				} else {
-					next[y * WINDOW_WIDTH + x] = DEAD;
+					next[y * SIM_X_SIZE + x] = DEAD;
 				}
 			}
 		}
@@ -55,72 +48,40 @@ void calc_frame(int* prev, int* next) {
 
 int init_game(int* first_frame) {
 
-	for (int i = WINDOW_WIDTH * 3; i < WINDOW_WIDTH * 7; i++) {
+	for (int i = SIM_X_SIZE * 3; i < SIM_X_SIZE * 7; i++) {
 
 		if (i % 4 == 0) i += 2;
 		first_frame[i] = ALIVE;
 	}
-	first_frame[WINDOW_HEIGHT / 2 * WINDOW_WIDTH + WINDOW_WIDTH / 2] = ALIVE;
-	first_frame[(WINDOW_HEIGHT / 2 + 1) * WINDOW_WIDTH + WINDOW_WIDTH / 2 + 1] = ALIVE;
-	first_frame[(WINDOW_HEIGHT / 2 + 2) * WINDOW_WIDTH + WINDOW_WIDTH / 2 - 1] = ALIVE;
-	first_frame[(WINDOW_HEIGHT / 2 + 2) * WINDOW_WIDTH + WINDOW_WIDTH / 2] = ALIVE;
-	first_frame[(WINDOW_HEIGHT / 2 + 2) * WINDOW_WIDTH + WINDOW_WIDTH / 2 + 1] = ALIVE;
+	first_frame[SIM_Y_SIZE / 2 * SIM_X_SIZE + SIM_X_SIZE / 2] = ALIVE;
+	first_frame[(SIM_Y_SIZE / 2 + 1) * SIM_X_SIZE + SIM_X_SIZE / 2 + 1] = ALIVE;
+	first_frame[(SIM_Y_SIZE / 2 + 2) * SIM_X_SIZE + SIM_X_SIZE / 2 - 1] = ALIVE;
+	first_frame[(SIM_Y_SIZE / 2 + 2) * SIM_X_SIZE + SIM_X_SIZE / 2] = ALIVE;
+	first_frame[(SIM_Y_SIZE / 2 + 2) * SIM_X_SIZE + SIM_X_SIZE / 2 + 1] = ALIVE;
 }
 
-int main() {
+int app() {
 
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-
-		printf("Initialization failed\n");
-		return 1;
-    }
-
-    SDL_Window* window = SDL_CreateWindow("The Game of Life [with feature]",
-            SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH,
-            WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
-
-    if (window == NULL) {
-        SDL_Quit();
-        return 1;
-    }
-
-    SDL_Renderer* rend = SDL_CreateRenderer(window, 0, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-
-	int prev_frame[WINDOW_HEIGHT * WINDOW_WIDTH] = {0};
-	int next_frame[WINDOW_HEIGHT * WINDOW_WIDTH] = {0};
+	int prev_frame[SIM_Y_SIZE * SIM_X_SIZE] = {0};
+	int next_frame[SIM_Y_SIZE * SIM_X_SIZE] = {0};
 
 	init_game(next_frame);
 
-    int quit = 0;
-    SDL_Event event;
+	for(int i = 0; i < 1000; i++) {
 
-    while (!quit) {
-
-        while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT) {
-                quit = 1;
-            }
-        }
-        for (int i = 0; i < WINDOW_HEIGHT * WINDOW_WIDTH; i++) {
+        for (int i = 0; i < SIM_Y_SIZE * SIM_X_SIZE; i++)
         	prev_frame[i] = next_frame[i];
-        }
+
         calc_frame(prev_frame, next_frame);
 
-        SDL_RenderClear(rend);
-        SDL_SetRenderDrawColor(rend, 0xFF, 0xFF, 0x00, 0xFF);
-
-		for (int x = 0; x < WINDOW_WIDTH; x++) {
-			for (int y = 0; y < WINDOW_HEIGHT; y++) {
-				if (prev_frame[y * WINDOW_WIDTH + x] == ALIVE)
-					SDL_RenderDrawPoint(rend, x, y);
+		for (int x = 0; x < SIM_X_SIZE; x++) {
+			for (int y = 0; y < SIM_Y_SIZE; y++) {
+				if (prev_frame[y * SIM_X_SIZE + x] == ALIVE)
+					simPutPixel(x, y, 0xFFFF00FF); //SDL_RenderDrawPoint(rend, x, y);
+				else
+					simPutPixel(x, y, 0x0000FFFF);
 			}
 		}
-        SDL_SetRenderDrawColor(rend, 0x00, 0x00, 0x00, 0xFF);
-        SDL_RenderPresent(rend);
-        usleep(10 * 1000);
+		simFlush();
     }
-
-    SDL_DestroyWindow(window);
-    SDL_DestroyRenderer(rend);
-    SDL_Quit();
 }
