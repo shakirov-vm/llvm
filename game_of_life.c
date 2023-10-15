@@ -1,5 +1,5 @@
 #include "sim.h"
-// gcc game_of_life.c -lSDL2
+// gcc game_of_life.c sim.c -lSDL2
 
 #define ALIVE 1
 #define DEAD 0
@@ -77,9 +77,9 @@ int app() {
 		for (int x = 0; x < SIM_X_SIZE; x++) {
 			for (int y = 0; y < SIM_Y_SIZE; y++) {
 				if (prev_frame[y * SIM_X_SIZE + x] == ALIVE)
-					simPutPixel(x, y, 0xFFFF00FF); //SDL_RenderDrawPoint(rend, x, y);
+					simPutPixel(x, y, 0x00FFFF00); // Yellow
 				else
-					simPutPixel(x, y, 0x0000FFFF);
+					simPutPixel(x, y, 0x00000000); // Black
 			}
 		}
 		simFlush();
