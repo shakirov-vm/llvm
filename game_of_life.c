@@ -1,5 +1,6 @@
 #include "sim.h"
-// gcc game_of_life.c sim.c -lSDL2
+// clang game_of_life.c sim.c -lSDL2 -I"/usr/include/SDL2/"
+// clang -Xclang -load -Xclang ./libPass.so game_of_life.c log.c sim.c -lSDL2 -I"/usr/include/SDL2/"
 
 #define ALIVE 1
 #define DEAD 0
@@ -46,7 +47,7 @@ void calc_frame(int* prev, int* next) {
 	}
 }
 
-int init_game(int* first_frame) {
+void init_game(int* first_frame) {
 
 	for (int i = SIM_X_SIZE * 3; i < SIM_X_SIZE * 7; i++) {
 
@@ -60,7 +61,7 @@ int init_game(int* first_frame) {
 	first_frame[(SIM_Y_SIZE / 2 + 2) * SIM_X_SIZE + SIM_X_SIZE / 2 + 1] = ALIVE;
 }
 
-int app() {
+void app() {
 
 	int prev_frame[SIM_Y_SIZE * SIM_X_SIZE] = {0};
 	int next_frame[SIM_Y_SIZE * SIM_X_SIZE] = {0};

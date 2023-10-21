@@ -1,1 +1,5 @@
 a.out
+build
+*.o
+*.so
+*.ll
