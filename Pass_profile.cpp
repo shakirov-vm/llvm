@@ -16,7 +16,7 @@ struct ProfilerPass : public FunctionPass {
 
   bool isFuncLogger(StringRef name) {
     return name == "binOptLogger" || name == "callLogger" ||
-           name == "funcStartLogger" || name == "funcEndLogger";
+           name == "funcStartLogger" || name == "funcEndLogger" || name == "BranchLogger";
   }
 
   virtual bool runOnFunction(Function &F) {
@@ -85,6 +85,16 @@ struct ProfilerPass : public FunctionPass {
     FunctionCallee binOptLogFunc =
         F.getParent()->getOrInsertFunction("binOptLogger", binOptLogFuncType);
     
+//int num_suc, int basic, char* braName, char* funcName
+    // Prepare BranchLogger function
+    ArrayRef<Type *> BranchParamTypes = {
+                                            builder.getInt8Ty()->getPointerTo(),
+                                            builder.getInt8Ty()->getPointerTo()};
+    FunctionType *BranchLogFuncType =
+        FunctionType::get(retType, BranchParamTypes, false);
+    FunctionCallee BranchLogFunc =
+        F.getParent()->getOrInsertFunction("BranchLogger", BranchLogFuncType);
+
     // Insert loggers for call, binOpt and ret instructions
     for (auto &B : F) {
       for (auto &I : B) {
@@ -125,6 +135,21 @@ struct ProfilerPass : public FunctionPass {
           Value *opName = builder.CreateGlobalStringPtr(op->getOpcodeName());
           Value *args[] = {op, lhs, rhs, opName, funcName, valueAddr};
           builder.CreateCall(binOptLogFunc, args);
+        }
+        if (auto *bra = dyn_cast<BranchInst>(&I)) {
+
+//            outs() << "Yes" << "\n";
+
+            builder.SetInsertPoint(bra);
+            
+    //        Value *cond = bra->getCondition();
+            //unsigned num_suc = bra->getNumSuccessors();
+      //      Value *basic = bra->getSuccessor(0);
+
+            Value *funcName = builder.CreateGlobalStringPtr(F.getName());
+            Value *braName = builder.CreateGlobalStringPtr(bra->getOpcodeName());
+            Value *args[] = {braName, funcName};
+            builder.CreateCall(BranchLogFunc, args);
         }
       }
     }

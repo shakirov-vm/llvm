@@ -15,3 +15,7 @@ void funcEndLogger(char* funcName, long int valID){
 void binOptLogger(int val, int arg0, int arg1, char* opName, char* funcName, long int valID){
     printf("[LOG] In function '%s': %d = %d %s %d {%ld}\n", funcName, val, arg0, opName, arg1, valID);
 }
+
+void BranchLogger(char* braName, char* funcName) {
+    printf("[LOG] In function '%s': braName: '%s'\n", funcName, braName);
+}
