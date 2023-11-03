@@ -10,6 +10,8 @@
 
 // clang game_of_life.c -emit-llvm -S -O2 -o game.ll
 
+// clang++ `llvm-config --cppflags --ldflags --libs` ./irgen_utils/generator.cpp
+
 #define ALIVE 1
 #define DEAD 0
 
