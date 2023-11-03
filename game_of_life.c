@@ -30,6 +30,14 @@ void calc_frame(int* prev, int* next) {
 		for (int y = 0; y < SIM_Y_SIZE; y++) {
 
 			int near_alive = 0;
+/*
+			for (int y_shift = -1; y_shift <= 1; y_shift++) {
+				for (int x_shift = -1; x_shift <= 1; x_shift++) {
+					if (prev[calc_neighb(y + y_shift, x + x_shift)] == ALIVE) near_alive++;		
+				}	
+			}
+			if (prev[calc_neighb(y, x)] == ALIVE) near_alive--;
+*/
 			if (prev[calc_neighb(y - 1, x - 1)] == ALIVE) near_alive++;
 			if (prev[calc_neighb(y - 1, x    )] == ALIVE) near_alive++;
 			if (prev[calc_neighb(y - 1, x + 1)] == ALIVE) near_alive++;
