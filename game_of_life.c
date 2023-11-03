@@ -3,8 +3,8 @@
 
 // clang++ Pass_profile.cpp -c -fPIC -I`llvm-config --includedir` -o Pass.o
 // clang++ Pass.o -fPIC -shared -o libPass.so
-// clang -Xclang -load -Xclang ./libPass.so game_of_life.c -lSDL2 -I"/usr/include/SDL2/" -emit-llvm -S -o game.ll
-// clang -Xclang -load -Xclang ./libPass.so game_of_life.c log.c sim.c -lSDL2 -I"/usr/include/SDL2/"
+// clang -Xclang -load -Xclang ./libPass.so game_of_life.c -lSDL2 -I"/usr/include/SDL2/" -emit-llvm -S -O2 -o game.ll
+// clang -Xclang -load -Xclang ./libPass.so game_of_life.c log.c sim.c -lSDL2 -I"/usr/include/SDL2/" -O2
 // ./a.out > instruction.txt
 // python3 statistic.py
 
