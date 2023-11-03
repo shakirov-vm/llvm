@@ -1,12 +1,14 @@
 #include "sim.h"
 // clang game_of_life.c sim.c -lSDL2 -I"/usr/include/SDL2/"
 
-// clang++ Pass_profile.cpp -c -fPIC -I`llvm-config --includedir` -o Pass.o
+// clang++ pass_utils/Pass_profile.cpp -c -fPIC -I`llvm-config --includedir` -o Pass.o
 // clang++ Pass.o -fPIC -shared -o libPass.so
 // clang -Xclang -load -Xclang ./libPass.so game_of_life.c -lSDL2 -I"/usr/include/SDL2/" -emit-llvm -S -O2 -o game.ll
-// clang -Xclang -load -Xclang ./libPass.so game_of_life.c log.c sim.c -lSDL2 -I"/usr/include/SDL2/" -O2
+// clang -Xclang -load -Xclang ./libPass.so game_of_life.c pass_utils/log.c sim.c -lSDL2 -I"/usr/include/SDL2/" -O2
 // ./a.out > instruction.txt
-// python3 statistic.py
+// python3 pass_utils/statistic.py
+
+// clang game_of_life.c -emit-llvm -S -O2 -o game.ll
 
 #define ALIVE 1
 #define DEAD 0
