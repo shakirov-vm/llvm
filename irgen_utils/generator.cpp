@@ -295,30 +295,171 @@ void CreateAppFunc(LLVMContext &context, Module *module, IRBuilder<> &builder) {
   val37->addIncoming(val47, BB46);
 }
 
+void CreateGEPSnippet(IRBuilder<> &builder, Value *val0, Value **ret_val, BasicBlock *BB,
+                                    Value *left_or, Value *right_or) {
+
+  Value* val1 = builder.CreateOr(left_or, right_or);
+  Value* val2 = builder.CreateZExt(val1, builder.getInt64Ty());
+
+  Value* idx[] = {val2};
+  Value* val3 = GetElementPtrInst::CreateInBounds(builder.getInt32Ty(), val0, idx, "", BB);
+  Value* val4 = builder.CreateLoad(builder.getInt32Ty(), val3);
+  *ret_val = builder.CreateICmpEQ(val4, builder.getInt32(1));
+}
+
+void CreateCalcFrameFunc(LLVMContext &context, Module *module, IRBuilder<> &builder) {
+ // TODO: Invalid type: define dso_local
+
+  ArrayRef<Type *> FuncParamTypes = {builder.getInt32Ty()->getPointerTo(), builder.getInt32Ty()->getPointerTo()};
+  FunctionType *FuncType = FunctionType::get(builder.getVoidTy(), FuncParamTypes, false);
+  Function *Func = 
+      Function::Create(FuncType, Function::ExternalLinkage, "calc_frame", module);
+
+  Func->setDSOLocal(true);
+
+  BasicBlock *BB2 = BasicBlock::Create(context, "", Func);
+  BasicBlock *BB3 = BasicBlock::Create(context, "", Func);
+  BasicBlock *BB12 = BasicBlock::Create(context, "", Func);
+  BasicBlock *BB13 = BasicBlock::Create(context, "", Func);
+  BasicBlock *BB15 = BasicBlock::Create(context, "", Func);
+  BasicBlock *BB85 = BasicBlock::Create(context, "", Func);
+  BasicBlock *BB89 = BasicBlock::Create(context, "", Func);
+  BasicBlock *BB90 = BasicBlock::Create(context, "", Func);
+  BasicBlock *BB91 = BasicBlock::Create(context, "", Func);
+  BasicBlock *BB94 = BasicBlock::Create(context, "", Func);
+  BasicBlock *BB95 = BasicBlock::Create(context, "", Func);
+  BasicBlock *BB96 = BasicBlock::Create(context, "", Func);
+
+  builder.SetInsertPoint(BB2);
+
+  Argument* val0 = Func->getArg(0);
+  Argument* val1 = Func->getArg(1);
+  builder.CreateBr(BB3);
+  builder.SetInsertPoint(BB3);
+
+  PHINode* val4 = builder.CreatePHI(builder.getInt64Ty(), 2);
+  Value* val5 = builder.CreateTrunc(val4, builder.getInt32Ty());
+  Value* val6 = builder.CreateAdd(val5, builder.getInt32(511));
+  Value* val7 = builder.CreateAnd(val6, builder.getInt32(511));
+  Value* val8 = builder.CreateNSWAdd(val4, builder.getInt64(1)); 
+  Value* val9 = builder.CreateTrunc(val8, builder.getInt32Ty());
+  Value* val10 = builder.CreateAnd(val9, builder.getInt32(511));
+  Value* val11 = builder.CreateTrunc(val4, builder.getInt32Ty());
+
+  builder.CreateBr(BB15);
+  builder.SetInsertPoint(BB12);
+
+  builder.CreateRetVoid();
+  builder.SetInsertPoint(BB13);
+
+  Value* val14 = builder.CreateICmpEQ(val8, builder.getInt64(512));
+  builder.CreateCondBr(val14, BB12, BB3);
+  val4->addIncoming(builder.getInt64(0), BB2);
+  val4->addIncoming(val8, BB13);
+
+  builder.SetInsertPoint(BB15);
+
+  PHINode* val16 = builder.CreatePHI(builder.getInt64Ty(), 2);
+  Value* val17 = builder.CreateShl(val16, builder.getInt64(9), "", false, false);
+  Value* val18 = builder.CreateTrunc(val17, builder.getInt32Ty());
+  Value* val19 = builder.CreateAdd(val18, builder.getInt32(130560));
+  Value* val20 = builder.CreateAnd(val19, builder.getInt32(130560));
+  
+  Value* val25;
+  CreateGEPSnippet(builder, val0, &val25, BB15, val20, val7);
+  Value* val26 = builder.CreateZExt(val25, builder.getInt32Ty());
+
+  Value* val31;
+  CreateGEPSnippet(builder, val0, &val31, BB15, val20, val11);
+  Value* val32 = builder.CreateSelect(val25, builder.getInt32(2), builder.getInt32(1));
+  Value* val33 = builder.CreateSelect(val31, val32, val26);
+
+  Value* val38;
+  CreateGEPSnippet(builder, val0, &val38, BB15, val20, val10);
+  Value* val39 = builder.CreateZExt(val38, builder.getInt32Ty());
+  Value* val40 = builder.CreateNSWAdd(val33, val39);
+  Value* val41 = builder.CreateTrunc(val17, builder.getInt32Ty());
+
+  Value* val46;
+  CreateGEPSnippet(builder, val0, &val46, BB15, val7, val41);
+  Value* val47 = builder.CreateZExt(val46, builder.getInt32Ty());
+  Value* val48 = builder.CreateNSWAdd(val40, val47);
+
+  Value* val53;
+  CreateGEPSnippet(builder, val0, &val53, BB15, val10, val41);
+  Value* val54 = builder.CreateZExt(val53, builder.getInt32Ty());
+  Value* val55 = builder.CreateNSWAdd(val48, val54);
+  Value* val56 = builder.CreateNSWAdd(val16, builder.getInt64(1));
+  Value* val57 = builder.CreateTrunc(val17, builder.getInt32Ty());
+  Value* val58 = builder.CreateAdd(val57, builder.getInt32(512));
+  Value* val59 = builder.CreateAnd(val58, builder.getInt32(130560));
+
+  Value* val64;
+  CreateGEPSnippet(builder, val0, &val64, BB15, val59, val7);
+  Value* val65 = builder.CreateZExt(val64, builder.getInt32Ty());
+  Value* val66 = builder.CreateNSWAdd(val55, val65);
+
+  Value* val71;
+  CreateGEPSnippet(builder, val0, &val71, BB15, val59, val11);
+  Value* val72 = builder.CreateZExt(val71, builder.getInt32Ty());
+  Value* val73 = builder.CreateNSWAdd(val66, val72);
+
+  Value* val78;
+  CreateGEPSnippet(builder, val0, &val78, BB15, val59, val10);
+  Value* val79 = builder.CreateZExt(val78, builder.getInt32Ty());
+  Value* val80 = builder.CreateNSWAdd(val73, val79);
+  Value* val81 = builder.CreateNSWAdd(val17, val4);
+
+  Value* idx_82[] = {val81};
+  Value* val82 = GetElementPtrInst::CreateInBounds(builder.getInt32Ty(), val0, idx_82, "", BB15);
+  Value* val83 = builder.CreateLoad(builder.getInt32Ty(), val82);
+  Value* val84 = builder.CreateICmpEQ(val83, builder.getInt32(1));
+
+  val16->addIncoming(builder.getInt64(0), BB3);
+  val16->addIncoming(val56, BB96);
+
+  builder.CreateCondBr(val84, BB85, BB91);
+  builder.SetInsertPoint(BB85);
+
+  Value* val86 = builder.CreateAnd(val80, builder.getInt32(-2));
+  Value* val87 = builder.CreateICmpEQ(val86, builder.getInt32(2));
+
+  Value* idx_88[] = {val81};
+  Value* val88 = GetElementPtrInst::CreateInBounds(builder.getInt32Ty(), val1, idx_88, "", BB85);
+  builder.CreateCondBr(val87, BB90, BB89);
+
+  builder.SetInsertPoint(BB89);
+  builder.CreateStore(builder.getInt32(0), val88);
+  builder.CreateBr(BB96);
+
+  builder.SetInsertPoint(BB90);
+  builder.CreateStore(builder.getInt32(1), val88);
+  builder.CreateBr(BB96);
+
+  builder.SetInsertPoint(BB91);
+  Value* val92 = builder.CreateICmpSGT(val80, builder.getInt32(2));
+
+  Value* idx_93[] = {val81};
+  Value* val93 = GetElementPtrInst::CreateInBounds(builder.getInt32Ty(), val1, idx_93, "", BB91);
+  builder.CreateCondBr(val92, BB94, BB95);
+
+  builder.SetInsertPoint(BB94);
+  builder.CreateStore(builder.getInt32(1), val93);
+  builder.CreateBr(BB96);
+
+  builder.SetInsertPoint(BB95);
+  builder.CreateStore(builder.getInt32(0), val93);
+  builder.CreateBr(BB96);
+
+  builder.SetInsertPoint(BB96);
+  Value* val97 = builder.CreateICmpEQ(val56, builder.getInt64(256));
+  builder.CreateCondBr(val97, BB13, BB15);
+}
 /*
+; Function Attrs: nofree norecurse nounwind uwtable
+define dso_local void @calc_frame(i32* nocapture readonly %0, i32* nocapture %1) local_unnamed_addr #2 {
 
-36:                                               ; preds = %46, %26
-  %37 = phi i64 [ 0, %26 ], [ %47, %46 ]
-  %38 = shl nuw nsw i64 %37, 9
-  %39 = add nuw nsw i64 %38, %27
-  %40 = getelementptr inbounds [131072 x i32], [131072 x i32]* %1, i64 0, i64 %39
-  %41 = load i32, i32* %40, align 4, !tbaa !2
-  %42 = icmp eq i32 %41, 1
-  %43 = trunc i64 %37 to i32
-  br i1 %42, label %44, label %45
 
-44:                                               ; preds = %36
-  tail call void @simPutPixel(i32 %29, i32 %43, i32 16776960) #6
-  br label %46
-
-45:                                               ; preds = %36
-  tail call void @simPutPixel(i32 %28, i32 %43, i32 0) #6
-  br label %46
-
-46:                                               ; preds = %44, %45
-  %47 = add nuw nsw i64 %37, 1
-  %48 = icmp eq i64 %47, 256
-  br i1 %48, label %33, label %36
 }
 */
 
@@ -332,10 +473,10 @@ int main() {
 
   CreateModFunc(context, module, builder);
   CreateCalcNeighbFunc(context, module, builder);
-
+  CreateCalcFrameFunc(context, module, builder);
   CreateAppFunc(context, module, builder);
 
-  DeclareSimPutPixelFunc(context, module, builder);
+//  DeclareSimPutPixelFunc(context, module, builder);
 
   // declare void @llvm.lifetime.start.p0i8(i64 immarg, i8* nocapture) #1
 /*
