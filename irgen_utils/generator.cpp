@@ -455,13 +455,61 @@ void CreateCalcFrameFunc(LLVMContext &context, Module *module, IRBuilder<> &buil
   Value* val97 = builder.CreateICmpEQ(val56, builder.getInt64(256));
   builder.CreateCondBr(val97, BB13, BB15);
 }
-/*
-; Function Attrs: nofree norecurse nounwind uwtable
-define dso_local void @calc_frame(i32* nocapture readonly %0, i32* nocapture %1) local_unnamed_addr #2 {
 
+void CreateInitGameFunc(LLVMContext &context, Module *module, IRBuilder<> &builder) {
 
+  ArrayRef<Type *> FuncParamTypes = {builder.getInt32Ty()->getPointerTo()};
+  FunctionType *FuncType = FunctionType::get(builder.getVoidTy(), FuncParamTypes, false);
+  Function *Func = 
+      Function::Create(FuncType, Function::ExternalLinkage, "init_game", module);
+
+  Func->setDSOLocal(true);
+
+  BasicBlock *BB1 = BasicBlock::Create(context, "", Func);
+  BasicBlock *BB2 = BasicBlock::Create(context, "", Func);
+  BasicBlock *BB8 = BasicBlock::Create(context, "", Func);
+
+  Argument* val0 = Func->getArg(0);
+
+  builder.SetInsertPoint(BB1);
+  builder.CreateBr(BB8);
+
+  builder.SetInsertPoint(BB2);
+  
+  Value* val3 = GetElementPtrInst::CreateInBounds(builder.getInt32Ty(), val0, builder.getInt64(65792), "", BB2);
+  builder.CreateStore(builder.getInt32(1), val3);
+
+  Value* val4 = GetElementPtrInst::CreateInBounds(builder.getInt32Ty(), val0, builder.getInt64(66305), "", BB2);
+  builder.CreateStore(builder.getInt32(1), val4);
+
+  Value* val5 = GetElementPtrInst::CreateInBounds(builder.getInt32Ty(), val0, builder.getInt64(66815), "", BB2);
+  builder.CreateStore(builder.getInt32(1), val5);
+
+  Value* val6 = GetElementPtrInst::CreateInBounds(builder.getInt32Ty(), val0, builder.getInt64(66816), "", BB2);
+  builder.CreateStore(builder.getInt32(1), val6);
+
+  Value* val7 = GetElementPtrInst::CreateInBounds(builder.getInt32Ty(), val0, builder.getInt64(66817), "", BB2);
+  builder.CreateStore(builder.getInt32(1), val7);
+
+  builder.CreateRetVoid();
+  builder.SetInsertPoint(BB8);
+
+  PHINode* val9 = builder.CreatePHI(builder.getInt32Ty(), 2);
+  Value* val10 = builder.CreateAnd(val9, builder.getInt32(3));
+  Value* val11 = builder.CreateICmpEQ(val10, builder.getInt32(0));
+  Value* val12 = builder.CreateNSWAdd(val9, builder.getInt32(2));
+  Value* val13 = builder.CreateSelect(val11, val12, val9);
+  Value* val14 = builder.CreateSExt(val13, builder.getInt64Ty());
+
+  Value* val15 = GetElementPtrInst::CreateInBounds(builder.getInt32Ty(), val0, val14, "", BB8);
+  builder.CreateStore(builder.getInt32(1), val15);
+  Value* val16 = builder.CreateNSWAdd(val13, builder.getInt32(1));
+  Value* val17 = builder.CreateICmpSLT(val13, builder.getInt32(3583));
+  builder.CreateCondBr(val17, BB8, BB2);
+
+  val9->addIncoming(builder.getInt32(1536), BB1);
+  val9->addIncoming(val16, BB8);
 }
-*/
 
 int main() {
 
@@ -474,6 +522,7 @@ int main() {
   CreateModFunc(context, module, builder);
   CreateCalcNeighbFunc(context, module, builder);
   CreateCalcFrameFunc(context, module, builder);
+  CreateInitGameFunc(context, module, builder);
   CreateAppFunc(context, module, builder);
 
 //  DeclareSimPutPixelFunc(context, module, builder);
