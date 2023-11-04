@@ -5,7 +5,73 @@
 #include "llvm/IR/Module.h"
 #include "llvm/Support/TargetSelect.h"
 #include "llvm/Support/raw_ostream.h"
+
 using namespace llvm;
+
+// From root:
+// clang++ `llvm-config --cppflags --ldflags --libs` ./irgen_utils/generator.cpp -lSDL2 -I"/usr/include/SDL2/"
+
+#include <stdlib.h>
+#include <assert.h>
+#include <SDL2/SDL.h>
+#include <time.h>
+
+#define FRAME_TICKS 50
+#define SIM_X_SIZE 512
+#define SIM_Y_SIZE 256
+
+static SDL_Renderer *Renderer = NULL;
+static SDL_Window *Window = NULL;
+static Uint32 Ticks = 0;
+
+extern void app();
+
+void simInit()
+{
+    SDL_Init(SDL_INIT_VIDEO);
+    SDL_CreateWindowAndRenderer(SIM_X_SIZE, SIM_Y_SIZE, 0, &Window, &Renderer);
+    SDL_SetRenderDrawColor(Renderer, 0, 0, 0, 0);
+    SDL_RenderClear(Renderer);
+    srand(time(NULL));
+}
+
+void simExit()
+{
+    SDL_Event event;
+    while (1)
+    {
+        if (SDL_PollEvent(&event) && event.type == SDL_QUIT)
+            break;
+    }
+    SDL_DestroyRenderer(Renderer);
+    SDL_DestroyWindow(Window);
+    SDL_Quit();
+}
+
+void simFlush()
+{
+    SDL_PumpEvents();
+    assert(SDL_TRUE != SDL_HasEvent(SDL_QUIT) && "User-requested quit");
+    Uint32 cur_ticks = SDL_GetTicks() - Ticks;
+    if (cur_ticks < FRAME_TICKS)
+    {
+        SDL_Delay(FRAME_TICKS - cur_ticks);
+    }
+    SDL_RenderPresent(Renderer);
+}
+
+void simPutPixel(int x, int y, int argb)
+{
+    assert(0 <= x && x < SIM_X_SIZE && "Out of range");
+    assert(0 <= y && y < SIM_Y_SIZE && "Out of range");
+    Uint8 a = argb >> 24;
+    Uint8 r = (argb >> 16) & 0xFF;
+    Uint8 g = (argb >> 8) & 0xFF;
+    Uint8 b = argb & 0xFF;
+    SDL_SetRenderDrawColor(Renderer, r, g, b, a);
+    SDL_RenderDrawPoint(Renderer, x, y);
+    Ticks = SDL_GetTicks();
+}
 
 void CreateModFunc(LLVMContext &context, Module *module, IRBuilder<> &builder) {
   
@@ -72,11 +138,12 @@ void DeclareSimPutPixelFunc(LLVMContext &context, Module *module, IRBuilder<> &b
 #define FULL_SIZE 131072
 #define FULL_MEM 524288
 
-void CreateAppFunc(LLVMContext &context, Module *module, IRBuilder<> &builder) {
+void CreateAppFunc(LLVMContext &context, Module *module, IRBuilder<> &builder, Function **RetFunc) {
  // TODO: Invalid type: define dso_local i32 @app(i32 %0)
   FunctionType *FuncType = FunctionType::get(builder.getInt32Ty(), builder.getInt32Ty(), false);
   Function *Func = 
       Function::Create(FuncType, Function::ExternalLinkage, "app", module);
+  *RetFunc = Func;
 
   Func->setDSOLocal(true);
 
@@ -523,51 +590,48 @@ int main() {
   CreateCalcNeighbFunc(context, module, builder);
   CreateCalcFrameFunc(context, module, builder);
   CreateInitGameFunc(context, module, builder);
-  CreateAppFunc(context, module, builder);
+  Function *appFunc;
+  CreateAppFunc(context, module, builder, &appFunc);
+/*
+  ArrayRef<Type *> FuncParamTypes = {builder.getInt32Ty(), builder.getInt32Ty(), builder.getInt32Ty()};
+  FunctionType *FuncType =
+      FunctionType::get(builder.getVoidTy(), FuncParamTypes, false);
+  FunctionCallee simPutPixel = module->getOrInsertFunction("simPutPixel", FuncType);
 
+  Type *SimFlushParam[] = {builder.getVoidTy()};
+  FunctionType *SimFlushType =
+      FunctionType::get(builder.getVoidTy(), SimFlushParam, false);
+  FunctionCallee simFlush = module->getOrInsertFunction("simFlush", SimFlushType);
+*/
 //  DeclareSimPutPixelFunc(context, module, builder);
 
-  // declare void @llvm.lifetime.start.p0i8(i64 immarg, i8* nocapture) #1
-/*
-  // declare i32 @puts(i8*)
-  std::vector<Type *> putsArgs;
-  putsArgs.push_back(builder.getInt8Ty()->getPointerTo());
-  ArrayRef<Type *> argsRef(putsArgs);
-  FunctionType *putsType =
-      FunctionType::get(builder.getInt32Ty(), argsRef, false);
-  FunctionCallee putsFunc = module->getOrInsertFunction("puts", putsType);
-
-
-  // @0 = private unnamed_addr constant [14 x i8] c"hello world!\0A\00", align 1
-  Value *helloWorld = builder.CreateGlobalStringPtr("hello world!\n");
-
-  // declare i32 @puts(i8*)
-  std::vector<Type *> putsArgs;
-  putsArgs.push_back(builder.getInt8Ty()->getPointerTo());
-  ArrayRef<Type *> argsRef(putsArgs);
-  FunctionType *putsType =
-      FunctionType::get(builder.getInt32Ty(), argsRef, false);
-  FunctionCallee putsFunc = module->getOrInsertFunction("puts", putsType);
-
-  // %0 = call i32 @puts(i8* getelementptr inbounds ([14 x i8], [14 x i8]* @0,
-  // i32 0, i32 0))
-  builder.CreateCall(putsFunc, helloWorld);
-  // ret i32 0
-  builder.CreateRet(builder.getInt32(0));
-*/
   // Dump LLVM IR
   module->print(outs(), nullptr);
 
   // Interpreter of LLVM IR
-/*  outs() << "Running code...\n";
+  outs() << "Running code...\n";
   InitializeNativeTarget();
   InitializeNativeTargetAsmPrinter();
 
   ExecutionEngine *ee = EngineBuilder(std::unique_ptr<Module>(module)).create();
+  ee->InstallLazyFunctionCreator([&](const std::string &fnName) -> void * {
+    if (fnName == "simPutPixel") {
+      return reinterpret_cast<void *>(simPutPixel);
+    }
+    if (fnName == "simFlush") {
+      return reinterpret_cast<void *>(simFlush);
+    }
+    return nullptr;
+  });
+
   ee->finalizeObject();
+
+  simInit();
+  
   ArrayRef<GenericValue> noargs;
-  GenericValue v = ee->runFunction(mainFunc, noargs);
+  GenericValue v = ee->runFunction(appFunc, noargs);
   outs() << "Code was run.\n";
-*/
+
+  simExit();
   return 0;
 }
