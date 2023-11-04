@@ -181,77 +181,121 @@ void CreateAppFunc(LLVMContext &context, Module *module, IRBuilder<> &builder) {
 
   builder.CreateBr(BB23);
   builder.SetInsertPoint(BB23);
+
+  PHINode* val24 = builder.CreatePHI(builder.getInt32Ty(), 2);
+
+  Type *MemsetTwiceParam[] = {builder.getInt8Ty()->getPointerTo(), builder.getInt8Ty()->getPointerTo(), 
+                         builder.getInt64Ty(), builder.getInt1Ty()};
+  FunctionType *MemsetTwiceType =
+      FunctionType::get(builder.getVoidTy(), MemsetTwiceParam, false);
+  FunctionCallee MemsetTwiceFunc = module->getOrInsertFunction("llvm.memcpy.p0i8.p0i8.i64", MemsetTwiceType);
+
+  Value *MemsetTwiceCall[] = {val2, val4, builder.getInt64(FULL_MEM), builder.getInt1(false)};
+  builder.CreateCall(MemsetTwiceFunc, MemsetTwiceCall);
+
+  Type *CalcFrameParam[] = {builder.getInt32Ty()->getPointerTo(), builder.getInt32Ty()->getPointerTo()};
+  FunctionType *CalcFrameType =
+      FunctionType::get(builder.getVoidTy(), CalcFrameParam, false);
+  FunctionCallee CalcFrameFunc = module->getOrInsertFunction("calc_frame", CalcFrameType);
+
+  Value *CalcFrameCall[] = {val22, val16};
+  builder.CreateCall(CalcFrameFunc, CalcFrameCall);
+
+  builder.CreateBr(BB26);
+  builder.SetInsertPoint(BB25);
+
+  Type *LifeTimeEndParam[] = {builder.getInt64Ty()->getPointerTo(), builder.getInt8Ty()->getPointerTo()};
+  FunctionType *LifeTimeEndType =
+      FunctionType::get(builder.getVoidTy(), LifeTimeEndParam, false);
+  FunctionCallee LifeTimeEndFunc = module->getOrInsertFunction("llvm.lifetime.end.p0i8", LifeTimeEndType);
+
+  Value *LifeTimeEndCall4[] = {builder.getInt64(FULL_MEM), val4};
+  builder.CreateCall(LifeTimeEndFunc, LifeTimeEndCall4);
+
+  Value *LifeTimeEndCall2[] = {builder.getInt64(FULL_MEM), val2};
+  builder.CreateCall(LifeTimeEndFunc, LifeTimeEndCall2);
+
+  builder.CreateRetVoid();
+  builder.SetInsertPoint(BB26);
+
+  PHINode* val27 = builder.CreatePHI(builder.getInt64Ty(), 2);
+  Value* val28 = builder.CreateTrunc(val27, builder.getInt32Ty());
+  Value* val29 = builder.CreateTrunc(val27, builder.getInt32Ty());
+
+  builder.CreateBr(BB36);
+  builder.SetInsertPoint(BB30);
+
+  Type *SimFlushParam[] = {builder.getVoidTy()};
+  FunctionType *SimFlushType =
+      FunctionType::get(builder.getVoidTy(), SimFlushParam, false);
+  FunctionCallee SimFlushFunc = module->getOrInsertFunction("simFlush", SimFlushType);
+
+// TODO: what about tail call void (...)??
+  builder.CreateCall(SimFlushFunc);
+  Value* val31 = builder.CreateNSWAdd(val24, builder.getInt32(1)); // TODO: NUW
+  Value* val32 = builder.CreateICmpEQ(val31, builder.getInt32(1000));
+
+  builder.CreateCondBr(val32, BB25, BB23);
+  builder.SetInsertPoint(BB33);
+
+  Value* val34 = builder.CreateNSWAdd(val27, builder.getInt32(1)); // TODO: NUW
+  Value* val35 = builder.CreateICmpEQ(val34, builder.getInt64(512));
+
+  builder.CreateCondBr(val35, BB30, BB26);
+
+  val24->addIncoming(builder.getInt32(0), BB15);
+  val24->addIncoming(val31, BB30);
+
+  val27->addIncoming(builder.getInt64(0), BB23);
+  val27->addIncoming(val34, BB33);
+
+  builder.SetInsertPoint(BB36);
+
+  PHINode* val37 = builder.CreatePHI(builder.getInt64Ty(), 2);
+
+  Value* val38 = builder.CreateShl(val37, builder.getInt64(9), "", true, true);
+  Value* val39 = builder.CreateNSWAdd(val38, val27); // TODO: NUW
+
+  Value* idx_40[] = {builder.getInt64(0), val39};
+  Value* val40 = GetElementPtrInst::CreateInBounds(FullArrType, val1, idx_40, "", BB36);
+
+  Value* val41 = builder.CreateLoad(builder.getInt32Ty(), val40);
+  Value* val42 = builder.CreateICmpEQ(val41, builder.getInt32(1));
+  Value* val43 = builder.CreateTrunc(val37, builder.getInt32Ty());
+
+  builder.CreateCondBr(val42, BB44, BB45);
+
+  Type *SimPutPixelParam[] = {builder.getInt32Ty(), builder.getInt32Ty(), builder.getInt32Ty()};
+  FunctionType *SimPutPixelType =
+      FunctionType::get(builder.getVoidTy(), SimPutPixelParam, false);
+  FunctionCallee SimPutPixelFunc = module->getOrInsertFunction("simPutPixel", SimPutPixelType);
+
+  builder.SetInsertPoint(BB44);
+
+// TODO: what about tail call void (...)??
+  Value *SimPutPixelCall44[] = {val29, val43, builder.getInt32(16776960)};
+  builder.CreateCall(SimPutPixelFunc, SimPutPixelCall44);
+
+  builder.CreateBr(BB46);
+  builder.SetInsertPoint(BB45);
+
+// TODO: what about tail call void (...)??
+  Value *SimPutPixelCall45[] = {val28, val43, builder.getInt32(0)};
+  builder.CreateCall(SimPutPixelFunc, SimPutPixelCall45);
+
+  builder.CreateBr(BB46);
+  builder.SetInsertPoint(BB46);
+
+  Value* val47 = builder.CreateNSWAdd(val37, builder.getInt64(1)); // TODO: NUW
+  Value* val48 = builder.CreateICmpEQ(val47, builder.getInt64(256));
+
+  builder.CreateCondBr(val48, BB33, BB36);
+
+  val37->addIncoming(builder.getInt64(0), BB26);
+  val37->addIncoming(val47, BB46);
 }
 
 /*
-
-; Function Attrs: nounwind uwtable
-define dso_local void @app() local_unnamed_addr #4 {
-  %1 = alloca [131072 x i32], align 16
-  %2 = bitcast [131072 x i32]* %1 to i8*
-  %3 = alloca [131072 x i32], align 16
-  %4 = bitcast [131072 x i32]* %3 to i8*
-  call void @llvm.lifetime.start.p0i8(i64 524288, i8* nonnull %2) #6
-  call void @llvm.memset.p0i8.i64(i8* nonnull align 16 dereferenceable(524288) %2, i8 0, i64 524288, i1 false)
-  call void @llvm.lifetime.start.p0i8(i64 524288, i8* nonnull %4) #6
-  call void @llvm.memset.p0i8.i64(i8* nonnull align 16 dereferenceable(524288) %4, i8 0, i64 524288, i1 false)
-  br label %5
-
-5:                                                ; preds = %5, %0
-  %6 = phi i32 [ 1536, %0 ], [ %13, %5 ]
-  %7 = and i32 %6, 3
-  %8 = icmp eq i32 %7, 0
-  %9 = add nsw i32 %6, 2
-  %10 = select i1 %8, i32 %9, i32 %6
-  %11 = sext i32 %10 to i64
-  %12 = getelementptr inbounds [131072 x i32], [131072 x i32]* %3, i64 0, i64 %11
-  store i32 1, i32* %12, align 4, !tbaa !2
-  %13 = add nsw i32 %10, 1
-  %14 = icmp slt i32 %10, 3583
-  br i1 %14, label %5, label %15
-
-15:                                               ; preds = %5
-  %16 = getelementptr inbounds [131072 x i32], [131072 x i32]* %3, i64 0, i64 0
-  %17 = getelementptr inbounds [131072 x i32], [131072 x i32]* %3, i64 0, i64 65792
-  store i32 1, i32* %17, align 16, !tbaa !2
-  %18 = getelementptr inbounds [131072 x i32], [131072 x i32]* %3, i64 0, i64 66305
-  store i32 1, i32* %18, align 4, !tbaa !2
-  %19 = getelementptr inbounds [131072 x i32], [131072 x i32]* %3, i64 0, i64 66815
-  store i32 1, i32* %19, align 4, !tbaa !2
-  %20 = getelementptr inbounds [131072 x i32], [131072 x i32]* %3, i64 0, i64 66816
-  store i32 1, i32* %20, align 16, !tbaa !2
-  %21 = getelementptr inbounds [131072 x i32], [131072 x i32]* %3, i64 0, i64 66817
-  store i32 1, i32* %21, align 4, !tbaa !2
-  %22 = getelementptr inbounds [131072 x i32], [131072 x i32]* %1, i64 0, i64 0
-  br label %23
-
-23:                                               ; preds = %30, %15
-  %24 = phi i32 [ 0, %15 ], [ %31, %30 ]
-  call void @llvm.memcpy.p0i8.p0i8.i64(i8* nonnull align 16 dereferenceable(524288) %2, i8* nonnull align 16 dereferenceable(524288) %4, i64 524288, i1 false)
-  call void @calc_frame(i32* nonnull %22, i32* nonnull %16)
-  br label %26
-
-25:                                               ; preds = %30
-  call void @llvm.lifetime.end.p0i8(i64 524288, i8* nonnull %4) #6
-  call void @llvm.lifetime.end.p0i8(i64 524288, i8* nonnull %2) #6
-  ret void
-
-26:                                               ; preds = %33, %23
-  %27 = phi i64 [ 0, %23 ], [ %34, %33 ]
-  %28 = trunc i64 %27 to i32
-  %29 = trunc i64 %27 to i32
-  br label %36
-
-30:                                               ; preds = %33
-  tail call void (...) @simFlush() #6
-  %31 = add nuw nsw i32 %24, 1
-  %32 = icmp eq i32 %31, 1000
-  br i1 %32, label %25, label %23
-
-33:                                               ; preds = %46
-  %34 = add nuw nsw i64 %27, 1
-  %35 = icmp eq i64 %34, 512
-  br i1 %35, label %30, label %26
 
 36:                                               ; preds = %46, %26
   %37 = phi i64 [ 0, %26 ], [ %47, %46 ]
