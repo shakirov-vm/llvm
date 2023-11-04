@@ -75,14 +75,12 @@ void simPutPixel(int x, int y, int argb)
 
 void CreateModFunc(LLVMContext &context, Module *module, IRBuilder<> &builder) {
   
-  // define int mod(int num, int mod)
   ArrayRef<Type *> FuncModParamTypes = {builder.getInt32Ty(), builder.getInt32Ty()};
   FunctionType *FuncModType = FunctionType::get(builder.getInt32Ty(), FuncModParamTypes, false);
   Function *ModFunc = 
       Function::Create(FuncModType, Function::ExternalLinkage, "mod", module);
 
   ModFunc->setDSOLocal(true);
-//  ModFunc->addFnAttr(Attribute::LocalUnnamedAddr);
 
   BasicBlock *BB2 = BasicBlock::Create(context, "", ModFunc);
   builder.SetInsertPoint(BB2);
@@ -95,7 +93,7 @@ void CreateModFunc(LLVMContext &context, Module *module, IRBuilder<> &builder) {
 
   builder.CreateRet(val4);
 }
-// TODO: local_unnamed_addr
+
 void CreateCalcNeighbFunc(LLVMContext &context, Module *module, IRBuilder<> &builder) {
   
   ArrayRef<Type *> FuncParamTypes = {builder.getInt32Ty(), builder.getInt32Ty()};
@@ -121,25 +119,11 @@ void CreateCalcNeighbFunc(LLVMContext &context, Module *module, IRBuilder<> &bui
   builder.CreateRet(val8);
 }
 
-//#include "llvm-project/clang/lib/CodeGen/CodeGenModule.h"
-
-void DeclareSimPutPixelFunc(LLVMContext &context, Module *module, IRBuilder<> &builder) {
-
-  ArrayRef<Type *> FuncParamTypes = {builder.getInt32Ty(), builder.getInt32Ty(), builder.getInt32Ty()};
-  FunctionType *FuncType =
-      FunctionType::get(builder.getVoidTy(), FuncParamTypes, false);
-  FunctionCallee DeclFunc = module->getOrInsertFunction("simPutPixel", FuncType);
-
-//  setDSOLocal(DeclFunc); TODO
-}
-
-// declare dso_local void @simPutPixel(i32, i32, i32) local_unnamed_addr #5
-
 #define FULL_SIZE 131072
 #define FULL_MEM 524288
 
 void CreateAppFunc(LLVMContext &context, Module *module, IRBuilder<> &builder, Function **RetFunc) {
- // TODO: Invalid type: define dso_local i32 @app(i32 %0)
+
   FunctionType *FuncType = FunctionType::get(builder.getInt32Ty(), builder.getInt32Ty(), false);
   Function *Func = 
       Function::Create(FuncType, Function::ExternalLinkage, "app", module);
@@ -160,7 +144,6 @@ void CreateAppFunc(LLVMContext &context, Module *module, IRBuilder<> &builder, F
   BasicBlock *BB45 = BasicBlock::Create(context, "", Func);
   BasicBlock *BB46 = BasicBlock::Create(context, "", Func);
 
-// TODO: align and more params
   ArrayType *FullArrType = ArrayType::get(builder.getInt32Ty(), FULL_SIZE);
 
   builder.SetInsertPoint(BB0);
@@ -297,15 +280,14 @@ void CreateAppFunc(LLVMContext &context, Module *module, IRBuilder<> &builder, F
       FunctionType::get(builder.getVoidTy(), SimFlushParam, false);
   FunctionCallee SimFlushFunc = module->getOrInsertFunction("simFlush", SimFlushType);
 
-// TODO: what about tail call void (...)??
   builder.CreateCall(SimFlushFunc);
-  Value* val31 = builder.CreateNSWAdd(val24, builder.getInt32(1)); // TODO: NUW
+  Value* val31 = builder.CreateNSWAdd(val24, builder.getInt32(1));
   Value* val32 = builder.CreateICmpEQ(val31, builder.getInt32(1000));
 
   builder.CreateCondBr(val32, BB25, BB23);
   builder.SetInsertPoint(BB33);
 
-  Value* val34 = builder.CreateNSWAdd(val27, builder.getInt32(1)); // TODO: NUW
+  Value* val34 = builder.CreateNSWAdd(val27, builder.getInt32(1));
   Value* val35 = builder.CreateICmpEQ(val34, builder.getInt64(512));
 
   builder.CreateCondBr(val35, BB30, BB26);
@@ -321,7 +303,7 @@ void CreateAppFunc(LLVMContext &context, Module *module, IRBuilder<> &builder, F
   PHINode* val37 = builder.CreatePHI(builder.getInt64Ty(), 2);
 
   Value* val38 = builder.CreateShl(val37, builder.getInt64(9), "", true, true);
-  Value* val39 = builder.CreateNSWAdd(val38, val27); // TODO: NUW
+  Value* val39 = builder.CreateNSWAdd(val38, val27);
 
   Value* idx_40[] = {builder.getInt64(0), val39};
   Value* val40 = GetElementPtrInst::CreateInBounds(FullArrType, val1, idx_40, "", BB36);
@@ -339,21 +321,19 @@ void CreateAppFunc(LLVMContext &context, Module *module, IRBuilder<> &builder, F
 
   builder.SetInsertPoint(BB44);
 
-// TODO: what about tail call void (...)??
   Value *SimPutPixelCall44[] = {val29, val43, builder.getInt32(16776960)};
   builder.CreateCall(SimPutPixelFunc, SimPutPixelCall44);
 
   builder.CreateBr(BB46);
   builder.SetInsertPoint(BB45);
 
-// TODO: what about tail call void (...)??
   Value *SimPutPixelCall45[] = {val28, val43, builder.getInt32(0)};
   builder.CreateCall(SimPutPixelFunc, SimPutPixelCall45);
 
   builder.CreateBr(BB46);
   builder.SetInsertPoint(BB46);
 
-  Value* val47 = builder.CreateNSWAdd(val37, builder.getInt64(1)); // TODO: NUW
+  Value* val47 = builder.CreateNSWAdd(val37, builder.getInt64(1));
   Value* val48 = builder.CreateICmpEQ(val47, builder.getInt64(256));
 
   builder.CreateCondBr(val48, BB33, BB36);
@@ -375,7 +355,6 @@ void CreateGEPSnippet(IRBuilder<> &builder, Value *val0, Value **ret_val, BasicB
 }
 
 void CreateCalcFrameFunc(LLVMContext &context, Module *module, IRBuilder<> &builder) {
- // TODO: Invalid type: define dso_local
 
   ArrayRef<Type *> FuncParamTypes = {builder.getInt32Ty()->getPointerTo(), builder.getInt32Ty()->getPointerTo()};
   FunctionType *FuncType = FunctionType::get(builder.getVoidTy(), FuncParamTypes, false);
@@ -592,18 +571,6 @@ int main() {
   CreateInitGameFunc(context, module, builder);
   Function *appFunc;
   CreateAppFunc(context, module, builder, &appFunc);
-/*
-  ArrayRef<Type *> FuncParamTypes = {builder.getInt32Ty(), builder.getInt32Ty(), builder.getInt32Ty()};
-  FunctionType *FuncType =
-      FunctionType::get(builder.getVoidTy(), FuncParamTypes, false);
-  FunctionCallee simPutPixel = module->getOrInsertFunction("simPutPixel", FuncType);
-
-  Type *SimFlushParam[] = {builder.getVoidTy()};
-  FunctionType *SimFlushType =
-      FunctionType::get(builder.getVoidTy(), SimFlushParam, false);
-  FunctionCallee simFlush = module->getOrInsertFunction("simFlush", SimFlushType);
-*/
-//  DeclareSimPutPixelFunc(context, module, builder);
 
   // Dump LLVM IR
   module->print(outs(), nullptr);
