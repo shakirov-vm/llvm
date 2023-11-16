@@ -2,5 +2,5 @@ a.out
 build
 *.o
 *.so
-*.ll
+game.ll
 *.txt
