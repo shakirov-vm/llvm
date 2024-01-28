@@ -62,6 +62,7 @@ void simFlush()
 
 void simPutPixel(int x, int y, int argb)
 {
+    outs() << "putpix: " << x << ", " << y << ", " << argb << "\n";
     assert(0 <= x && x < SIM_X_SIZE && "Out of range");
     assert(0 <= y && y < SIM_Y_SIZE && "Out of range");
     Uint8 a = argb >> 24;
@@ -565,15 +566,15 @@ int main() {
   Module *module = new Module("game_of_life.c", context);
   IRBuilder<> builder(context);
 
-  CreateModFunc(context, module, builder);
-  CreateCalcNeighbFunc(context, module, builder);
+//  CreateModFunc(context, module, builder);
+//  CreateCalcNeighbFunc(context, module, builder);
   CreateCalcFrameFunc(context, module, builder);
-  CreateInitGameFunc(context, module, builder);
+//  CreateInitGameFunc(context, module, builder);
   Function *appFunc;
   CreateAppFunc(context, module, builder, &appFunc);
 
   // Dump LLVM IR
-  module->print(outs(), nullptr);
+  module->print(errs(), nullptr);
 
   // Interpreter of LLVM IR
   outs() << "Running code...\n";

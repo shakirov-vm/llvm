@@ -1,0 +1,404 @@
+
+
+calc_frame: ; (i32* %0, i32* %1) 
+  
+  MVI x4 0
+
+  BR LABEL3
+  br label %3
+
+LABEL3:                                                ; preds = %13, %2
+
+  %4 = phi i64 [ 0, %2 ], [ %8, %13 ] ; %4 -> x4
+
+  ADAN x10 x4 511
+  %6 = add i32 %4, 511
+  %7 = and i32 %6, 511
+
+  ADDI x4 x4 1
+  %8 = add nsw i64 %4, 1
+
+  ANDI x11 x4 511
+  %10 = and i32 %8, 511
+
+  MVI x5, 0
+
+  BR LABEL15
+  br label %15
+
+LABEL12:                                               ; preds = %13
+
+  RET
+  ret void
+
+LABEL13:                                               ; preds = %96
+
+  ICBR x4 512 LABEL12 LABEL3
+  %14 = icmp eq i64 %8, 512
+  br i1 %14, label %12, label %3
+
+LABEL15:                                               ; preds = %96, %3
+
+  %16 = phi i64 [ 0, %3 ], [ %56, %96 ] ; %16 -> x5
+
+  SHLI x12 x5 9
+  %17 = shl i64 %16, 9
+
+  ADAN x13 x12 130560
+  %19 = add i32 %17, 130560
+  %20 = and i32 %19, 130560
+
+  ADDI x5 x5 1
+  %56 = add nsw i64 %16, 1
+
+  ADDI x14 x12 512
+  %58 = add i32 %17, 512
+
+  ANDI x15 x14 130560
+  %59 = and i32 %58, 130560
+
+  ADD x16 x12 x4
+  %81 = add nsw i64 %17, %4
+
+  OR x17 x13 x10
+  %21 = or i32 %20, %7
+  OR x18 x13 x4 
+  %27 = or i32 %20, %4
+  OR x19 x13 x11
+  %34 = or i32 %20, %10
+  OR x20 x10 x12
+  %42 = or i32 %7, %17
+  OR x21 x11 x12
+  %49 = or i32 %10, %17
+  OR x22 x15 x10
+  %60 = or i32 %59, %7
+  OR x23 x15 x4
+  %67 = or i32 %59, %4
+  OR x24 x15 x11
+  %74 = or i32 %59, %10
+
+  LANCO x25 x0 x17
+  %23 = getelementptr inbounds i32, i32* %0, i64 %21
+  %24 = load i32, i32* %23
+  %25 = icmp eq i32 %24, 1
+
+  LANCO x26 x0 x18
+  %29 = getelementptr inbounds i32, i32* %0, i64 %27
+  %30 = load i32, i32* %29
+  %31 = icmp eq i32 %30, 1
+
+  LANCO x27 x0 x19
+  %36 = getelementptr inbounds i32, i32* %0, i64 %34
+  %37 = load i32, i32* %36
+  %38 = icmp eq i32 %37, 1
+
+  LANCO x28 x0 x20
+  %44 = getelementptr inbounds i32, i32* %0, i64 %42
+  %45 = load i32, i32* %44
+  %46 = icmp eq i32 %45, 1
+
+  LANCO x29 x0 x21
+  %51 = getelementptr inbounds i32, i32* %0, i64 %49
+  %52 = load i32, i32* %51
+  %53 = icmp eq i32 %52, 1
+
+  LANCO x30 x0 x22
+  %62 = getelementptr inbounds i32, i32* %0, i64 %60
+  %63 = load i32, i32* %62
+  %64 = icmp eq i32 %63, 1
+
+  LANCO x31 x0 x23
+  %69 = getelementptr inbounds i32, i32* %0, i64 %67
+  %70 = load i32, i32* %69
+  %71 = icmp eq i32 %70, 1
+
+  LANCO x32 x0 x24
+  %76 = getelementptr inbounds i32, i32* %0, i64 %74
+  %77 = load i32, i32* %76
+  %78 = icmp eq i32 %77, 1
+
+  LANCO x33 x0 x16
+  %82 = getelementptr inbounds i32, i32* %0, i64 %81
+  %83 = load i32, i32* %82
+  %84 = icmp eq i32 %83, 1
+
+  SELECTI x34 x25 2 1
+  %32 = select i1 %25, i32 2, i32 1
+  SELECT x35 x26 x34 x25
+  %33 = select i1 %31, i32 %32, i32 %25
+
+  ADD x35 x35 x27
+  ADD x35 x35 x28 
+  ADD x35 x35 x29 
+  ADD x35 x35 x30 
+  ADD x35 x35 x31 
+  ADD x35 x35 x32 
+  %40 = add nsw i32 %33, %38
+  %48 = add nsw i32 %40, %46
+  %55 = add nsw i32 %48, %53
+  %66 = add nsw i32 %55, %64
+  %73 = add nsw i32 %66, %71
+  %80 = add nsw i32 %73, %78
+
+  BRCOND x33 LABEL85 LABEL91
+  br i1 %84, label %85, label %91
+
+LABEL85:                                               ; preds = %15
+
+  ANDI x36 x35 -2
+  %86 = and i32 %80, -2
+
+  GETPTR x37 x1 x16
+  %88 = getelementptr inbounds i32, i32* %1, i64 %81
+
+  ICBR x36 2 LABEL90 LABEL89
+  %87 = icmp eq i32 %86, 2
+  br i1 %87, label %90, label %89
+
+LABEL89:                                               ; preds = %85
+
+  STORE x37 0
+  store i32 0, i32* %88
+  BR LABEL96
+  br label %96
+
+LABEL90:                                               ; preds = %85
+  STORE x37 1
+  store i32 1, i32* %88
+  BR LABEL96
+  br label %96
+
+LABEL91:                                               ; preds = %15
+
+  GETPTR x38 x1 x16
+  %93 = getelementptr inbounds i32, i32* %1, i64 %81
+
+  ICMPS x39 x35 2
+  %92 = icmp sgt i32 %80, 2
+
+  BRCOND x39 LABEL94 LABEL95
+  br i1 %92, label %94, label %95
+
+LABEL94:                                               ; preds = %91
+  STORE x38 1
+  store i32 1, i32* %93
+  BR LABEL96
+  br label %96
+
+LABEL95:                                               ; preds = %91
+  STORE x38 0
+  store i32 0, i32* %93
+  BR LABEL96
+  br label %96
+
+LABEL96:                                               ; preds = %95, %94, %90, %89
+
+  ICBR x5 256 LABEL13 LABEL15
+  %97 = icmp eq i64 %56, 256
+  br i1 %97, label %13, label %15
+
+app: ; (i32 %0) 
+
+  ALLOCA x4 131072
+  ALLOCA x5 131072
+  %2 = alloca [131072 x i32] ; x4
+  %4 = alloca [131072 x i32] ; x5
+
+  MVI x6 1536
+
+  BR APP_LABEL6
+  br label %6
+
+APP_LABEL6:                                                ; preds = %6, %1
+
+  %7 = phi i32 [ 1536, %1 ], [ %14, %6 ] ; %7 -> x6
+
+  ANDI x10 x6 3
+  %8 = and i32 %7, 3
+
+  ICMPEQ x11 x10 0
+  %9 = icmp eq i32 %8, 0
+
+  ADDI x12 x6 2
+  %10 = add nsw i32 %7, 2
+
+  SELECT x13 x11 x12 x6
+  %11 = select i1 %9, i32 %10, i32 %7
+
+  GETPTRA x14 x5 x13
+  %13 = getelementptr inbounds [131072 x i32], [131072 x i32]* %4, i64 0, i64 %11
+
+  STORE x14 1
+  store i32 1, i32* %13
+
+  ADDI x6 x13 1
+  %14 = add nsw i32 %11, 1
+
+  ICMPL x15 x13 3583                              ; TODO: ICMPL
+  %15 = icmp slt i32 %11, 3583
+
+  BRCOND x15 APP_LABEL6 APP_LABEL16
+  br i1 %15, label %6, label %16
+
+APP_LABEL16:                                               ; preds = %6
+
+  GETPTRAI x16 x5 0
+  %17 = getelementptr inbounds [131072 x i32], [131072 x i32]* %4, i64 0, i64 0
+
+  GETPTRAI x17 x5 65792
+  GETPTRAI x18 x5 66305
+  GETPTRAI x19 x5 66815
+  GETPTRAI x20 x5 66816
+  GETPTRAI x21 x5 66817
+  %18 = getelementptr inbounds [131072 x i32], [131072 x i32]* %4, i64 0, i64 65792
+  %19 = getelementptr inbounds [131072 x i32], [131072 x i32]* %4, i64 0, i64 66305
+  %20 = getelementptr inbounds [131072 x i32], [131072 x i32]* %4, i64 0, i64 66815
+  %21 = getelementptr inbounds [131072 x i32], [131072 x i32]* %4, i64 0, i64 66816
+  %22 = getelementptr inbounds [131072 x i32], [131072 x i32]* %4, i64 0, i64 66817
+
+  STORE x17 1
+  STORE x18 1
+  STORE x19 1
+  STORE x20 1
+  STORE x21 1
+  store i32 1, i32* %18
+  store i32 1, i32* %19
+  store i32 1, i32* %20
+  store i32 1, i32* %21
+  store i32 1, i32* %22
+
+  GETPTRAI x22 x4 0
+  %23 = getelementptr inbounds [131072 x i32], [131072 x i32]* %2, i64 0, i64 0
+
+  MVI x7 0
+
+  BR APP_LABEL24
+  br label %24
+
+APP_LABEL24:                                               ; preds = %31, %16
+
+  %25 = phi i32 [ 0, %16 ], [ %32, %31 ] ; %25 -> x7
+
+  MEMCPY x4 x5 524288
+  call void @llvm.memcpy.p0i8.p0i8.i64(i8* %3, i8* %5, i64 524288, i1 false)
+
+  PUSH x0
+  PUSH x1
+
+  MV x0 x22
+  MV x1 x16
+
+  CALL calc_frame
+  call void @calc_frame(i32* %23, i32* %17)
+
+  POP x1
+  POP x0
+
+  MVI x8 0
+
+  BR APP_LABEL27
+  br label %27
+
+APP_LABEL26:                                               ; preds = %31
+
+  EXIT
+  ret void
+
+APP_LABEL27:                                               ; preds = %34, %24
+  
+  %28 = phi i64 [ 0, %24 ], [ %35, %34 ] ; %28 -> x8
+
+  MVI x9 0
+
+  BR APP_LABEL37
+  br label %37
+
+APP_LABEL31:                                               ; preds = %34
+
+  SIMFLUSH
+  call void @simFlush()
+
+  ADDI x7 x7 1
+  %32 = add nsw i32 %25, 1
+
+  ICBR x7 1000 APP_LABEL26 APP_LABEL24
+  %33 = icmp eq i32 %32, 1000
+  br i1 %33, label %26, label %24
+
+APP_LABEL34:                                               ; preds = %47
+
+  ADDI x8 x8 1
+  %35 = add nsw i64 %28, i32 1
+
+  ICBR x8 512 APP_LABEL31 APP_LABEL27
+  %36 = icmp eq i64 %35, 512
+  br i1 %36, label %31, label %27
+
+APP_LABEL37:                                               ; preds = %47, %27
+
+  %38 = phi i64 [ 0, %27 ], [ %48, %47 ] ; %38 -> x9
+
+  SHLI x25 x9 9 
+  %39 = shl nuw nsw i64 %38, 9
+
+  ADD x25 x25 x8  
+  %40 = add nsw i64 %39, %28
+
+  GETPTRA x25 x4 x25
+  %41 = getelementptr inbounds [131072 x i32], [131072 x i32]* %2, i64 0, i64 %40
+
+  LOAD x25 x25
+  %42 = load i32, i32* %41
+
+  ICBR x25 1 APP_LABEL45 APP_LABEL46
+  %43 = icmp eq i32 %42, 1
+  br i1 %43, label %45, label %46
+
+APP_LABEL45:                                               ; preds = %37
+
+  PUSH x0
+  PUSH x1
+  PUSH x2
+
+  MV x0 x8
+  MV x1 x9
+  MVI x2 16776960
+
+  SIMPUTPIXEL
+  call void @simPutPixel(i32 %28, i32 %38, i32 16776960)
+  
+  POP x2
+  POP x1
+  POP x0
+
+  BR APP_LABEL47
+  br label %47
+
+APP_LABEL46:                                               ; preds = %37
+
+  PUSH x0
+  PUSH x1
+  PUSH x2
+
+  MV x0 x8
+  MV x1 x9
+  MVI x2 0
+
+  SIMPUTPIXEL
+  call void @simPutPixel(i32 %28, i32 %38, i32 0)
+
+  POP x2
+  POP x1
+  POP x0
+
+  BR APP_LABEL47
+  br label %47
+
+APP_LABEL47:                                               ; preds = %46, %45
+
+  ADDI x9 x9 1
+  %48 = add nsw i64 %38, 1
+
+  ICBR x9 256 APP_LABEL34 APP_LABEL37
+  %49 = icmp eq i64 %48, 256
+  br i1 %49, label %34, label %37

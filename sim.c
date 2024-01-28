@@ -5,6 +5,7 @@
 #include <SDL2/SDL.h>
 #include <time.h>
 #include "sim.h"
+#include <stdio.h>
 
 #define FRAME_TICKS 50
 
@@ -58,6 +59,8 @@ void simFlush()
 
 void simPutPixel(int x, int y, int argb)
 {
+    printf("putpix: %d, %d, %d\n", x, y, argb);
+//    std::cout << "putpix: " << x << " " << y << " " << argb << "\n";
     assert(0 <= x && x < SIM_X_SIZE && "Out of range");
     assert(0 <= y && y < SIM_Y_SIZE && "Out of range");
     Uint8 a = argb >> 24;
